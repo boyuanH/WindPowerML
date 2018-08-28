@@ -1,0 +1,3 @@
+C:\Work\ZKLF\windpower\windpower\LocalMP\data\001.wav
+C:\Work\ZKLF\windpower\windpower\LocalMP\data\003.wav
+C:\Work\ZKLF\windpower\windpower\LocalMP\data\002.wav
