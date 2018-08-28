@@ -82,12 +82,17 @@ if __name__ == '__main__':
         modelfile = open(args.model_file)
         modelfiles = modelfile.readlines()
         start = datetime.now()
-        for fileitem in modelfiles:
-            wavfile = fileitem.strip()
+        for item in modelfiles:
+            fileitem = item.strip()
+            modeldatarootpath = os.path.split(args.model_file)
+            wavfile = os.path.join(modeldatarootpath[0], fileitem)
+            wavfilename = os.path.split(wavfile)[-1]
             if os.path.exists(wavfile):
-                filesuffix = wavfile[-3:]
+                filesuffix = wavfilename[-3:]
                 if ('WAV'.find(filesuffix.upper())) == 0:
-                    output_filepath = os.path.join(args.output_dir, wavfile[:-4] + ".npy")
+                    output_filepath = os.path.join(args.output_dir, fileitem[:-4] + ".npy")
+                    if not os.path.exists(output_filepath[:0-len(wavfilename)]):
+                        os.makedirs(output_filepath[:0-len(wavfilename)])
                     generate_feature_file(wavfile, output_filepath, channel_num, sample_per_frame)
                     npyfile.write(output_filepath + '\n')
         end = datetime.now()
@@ -97,17 +102,22 @@ if __name__ == '__main__':
     # Transform target wav file to npy file
     if os.path.exists(args.target_file):
         targetfile = open(args.target_file)
-        targetfiles = targetfile.readlines()
+        targetsfiles = targetfile.readlines()
         start = datetime.now()
-        for fileitem in targetfiles:
-            target_file = fileitem.strip()
-            if os.path.exists(target_file):
-                tarfilesuffix = target_file[-3:]
-                if ('WAV'.find(tarfilesuffix.upper())) == 0:
-                    output_filepath = os.path.join(args.output_dir, target_file[:-4] + ".npy")
-                    generate_feature_file(target_file, output_filepath, channel_num, sample_per_frame)
+        for item in targetsfiles:
+            fileitem = item.strip()
+            targetdatarootpath = os.path.split(args.target_file)
+            wavfile = os.path.join(targetdatarootpath[0], fileitem)
+            wavfilename = os.path.split(wavfile)[-1]
+            if os.path.exists(wavfile):
+                filesuffix = wavfilename[-3:]
+                if ('WAV'.find(filesuffix.upper())) == 0:
+                    output_filepath = os.path.join(args.output_dir, fileitem[:-4] + ".npy")
+                    if not os.path.exists(output_filepath[:0-len(wavfilename)]):
+                        os.makedirs(output_filepath[:0-len(wavfilename)])
+                    generate_feature_file(wavfile, output_filepath, channel_num, sample_per_frame)
         end = datetime.now()
-        print('Target data Process time ' + str(end - start))
+        print('Target   data Process time ' + str(end - start))
 
 
 
