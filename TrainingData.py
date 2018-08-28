@@ -1,5 +1,6 @@
 import sys
 import argparse
+import configparser
 import pickle
 import os
 import numpy as np
@@ -30,8 +31,10 @@ def generate_postprocessor(filepath_list, network, preprocessor):
 def main(traindata_filepath_list, output_dir, gpu, batch_size, epoch, validdata_filepath_list, n_filters, k_size, dim, frame, warmup, binwise):
     os.makedirs(output_dir, exist_ok=True)
     preprocessor = generate_preprocessor(dim, traindata_filepath_list, binwise)
-    network = net.ConvolutionalVariationalAutoEncoderNetWork(gpu=gpu, n_filters=n_filters, ksize=k_size, dim=dim, frame=frame)
-    trained_network = network.train(traindata_filepath_list, output_dir, fileloader=np.load, preprocessor=preprocessor, batch_size=batch_size, epoch=epoch, validdata_filepath_list=validdata_filepath_list, warmup=warmup)
+    network = net.ConvolutionalVariationalAutoEncoderNetWork(gpu=gpu, n_filters=n_filters, ksize=k_size,
+                                                             dim=dim, frame=frame)
+    trained_network = network.train(traindata_filepath_list, output_dir, fileloader=np.load, preprocessor=preprocessor,
+                                    batch_size=batch_size, epoch=epoch, validdata_filepath_list=validdata_filepath_list, warmup=warmup)
     postprocessor = generate_postprocessor(traindata_filepath_list, network, preprocessor)
     chainer.serializers.save_npz(os.path.join(output_dir, 'network_final.npz'), trained_network)
     with open(os.path.join(output_dir, 'preprocessor.pickle'), 'wb') as f:
@@ -42,34 +45,54 @@ def main(traindata_filepath_list, output_dir, gpu, batch_size, epoch, validdata_
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='train DNN')
-    parser.add_argument('traindata_listpath', type=str, help='list file path of train data file paths')
-    parser.add_argument('output_dir', type=str, help='directory to output model/log/etc...')
+    parser.add_argument('-t', '--traindata_listpath', type=str, default='./output/npylist.txt',
+                        help='list file path of train data file paths')
+    parser.add_argument('-o', '--output_dir', type=str, default='./output/', help='directory to output model/log/etc...')
+    parser.add_argument('-c', '--config_file', type=str, default='./conf/TrainningDataConfig.ini',
+                        help='input config file')
+
     parser.add_argument('-g', '--gpu', type=int, default=-1, help='GPU Number (-1:CPU)')
     parser.add_argument('-b', '--batch_size', type=int, default=10, help='batch size')
     parser.add_argument('-e', '--epoch', type=int, default=100, help='epoch')
-    parser.add_argument('-v', '--validdata_listpath', type=str, default=None, help='list file path of validation data file paths')
+    parser.add_argument('-v', '--validdata_listpath', type=str, default=None,
+                        help='list file path of validation data file paths')
     parser.add_argument('-n', '--n_filters', type=int, default=8, help='n_filters')
     parser.add_argument('-k', '--k_size', type=int, default=5, help='k_size')
     parser.add_argument('-d', '--dim', type=int, default=256, help='dim')
     parser.add_argument('-f', '--frame', type=int, default=32, help='count of frames')
     parser.add_argument('-w', '--warmup', type=int, default=10, help='warm-up epoch')
+
     group2 = parser.add_mutually_exclusive_group()
     group2.add_argument('--binwise', dest='binwise', action='store_true')
     group2.add_argument('--no-binwise', dest='binwise', action='store_false')
     parser.set_defaults(binwise=False)
-
     args = parser.parse_args()
 
-    start = datetime.now()
+    config = configparser.ConfigParser()
+    if not os.path.exists(args.config_file):
+        print('No config file found')
+        exit()
+    config.read(args.config_file)
 
+    validdata_listpath = (config.get("TrainningData", "validdata_listpath"))
+    gpu = int(config.get("TrainningData", "gpu"))
+    batch_size = int(config.get("TrainningData", "batch_size"))
+    epoch = int(config.get("TrainningData", "epoch"))
+    n_filters = int(config.get("TrainningData", "n_filters"))
+    k_size = int(config.get("TrainningData", "k_size"))
+    dim = int(config.get("TrainningData", "dim"))
+    frame = int(config.get("TrainningData", "frame"))
+    warmup = int(config.get("TrainningData", "warmup"))
+
+    start = datetime.now()
     traindata_filepath_list = [filepath.strip() for filepath in open(args.traindata_listpath, 'r')]
     if args.validdata_listpath:
-        validdata_filepath_list = [filepath.strip() for filepath in open(args.validdata_listpath, 'r')]
+        validdata_filepath_list = [filepath.strip() for filepath in open(validdata_listpath, 'r')]
     else:
         validdata_filepath_list = None
 
-    main(traindata_filepath_list, args.output_dir, args.gpu, args.batch_size, args.epoch, validdata_filepath_list,
-         args.n_filters, args.k_size, args.dim, args.frame, args.warmup, args.binwise)
+    main(traindata_filepath_list, args.output_dir, gpu, batch_size, epoch, validdata_filepath_list,
+         n_filters, k_size, dim, frame, warmup, args.binwise)
 
     end = datetime.now()
     print(end - start)
