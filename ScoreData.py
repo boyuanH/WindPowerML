@@ -1,9 +1,11 @@
 import argparse
 import numpy as np
+import configparser
 from datetime import datetime
 from datetime import timedelta
 import cms_cvae
 import csv
+import os
 
 
 def create_datelist(date_length, file_name_date, frame):
@@ -57,21 +59,29 @@ def main(input_npy_filepath, model_filepath, preporocessor_filepath, postprocess
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='result score')
-    parser.add_argument('input_npy_filepath', type=str, help='1')
-    parser.add_argument('model_filepath', type=str, help='2')
-    parser.add_argument('preporocessor_filepath', type=str, help='3')
-    parser.add_argument('postprocessor_filepath', type=str, help='4')
-    parser.add_argument('output_csv_filepath', type=str, help='5')
-    parser.add_argument('file_name_date', type=str, help='6')
-    parser.add_argument('gpu', type=int, help='7')
-    parser.add_argument('dim', type=int, help='8')
-    parser.add_argument('frame', type=int, help='9')
+    parser.add_argument('-i', '--input_npy_filepath', required=True, type=str, help='1')
+    parser.add_argument('-m', '--model_filepath', required=True, type=str, help='2')
+    parser.add_argument('-o', '--output_csv_filepath', default='./output/output.csv', type=str, help='5')
+    parser.add_argument('-f', '--file_name_date', required=True, type=str, help='6')
+    parser.add_argument('-c', '--config_file', type=str, default='./conf/ScoreDataConfig.ini', help='6')
 
     args = parser.parse_args()
 
+    config = configparser.ConfigParser()
+    if not os.path.exists(args.config_file):
+        print('No config file found')
+        exit()
+    config.read(args.config_file)
+    gpu = int(config.get("ScoreData", "gpu"))
+    dim = int(config.get("ScoreData", "dim"))
+    frame = int(config.get("ScoreData", "frame"))
+
     date_dt = datetime.strptime(args.file_name_date, '%Y-%m-%d_%H-%M-%S-%f')
+    model_filepath = os.path.join(args.model_filepath, 'network_final.npz')
+    preporocessor_filepath = os.path.join(args.model_filepath, 'preprocessor.pickle')
+    postprocessor_filepath = os.path.join(args.model_filepath, 'postprocessor.pickle')
     start = datetime.now()
-    main(args.input_npy_filepath, args.model_filepath, args.preporocessor_filepath, args.postprocessor_filepath,
-         args.output_csv_filepath, date_dt, args.gpu, args.dim, args.frame)
+    main(args.input_npy_filepath, model_filepath, preporocessor_filepath, postprocessor_filepath,
+         args.output_csv_filepath, date_dt, gpu, dim, frame)
     end = datetime.now()
     print(end - start)
