@@ -59,10 +59,10 @@ def main(input_npy_filepath, model_filepath, preporocessor_filepath, postprocess
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='result score')
-    parser.add_argument('-i', '--input_npy_filepath', required=True, type=str, help='1')
-    parser.add_argument('-m', '--model_filepath', required=True, type=str, help='2')
+    parser.add_argument('-i', '--targetwavfile_filepath', required=True, type=str, help='1')
+    parser.add_argument('-m', '--model_filepath', type=str, help='2')
     parser.add_argument('-o', '--output_csv_filepath', default='./output/output.csv', type=str, help='5')
-    parser.add_argument('-f', '--file_name_date', required=True, type=str, help='6')
+    parser.add_argument('-f', '--file_name_date', type=str, help='6')
     parser.add_argument('-c', '--config_file', type=str, default='./conf/ScoreDataConfig.ini', help='6')
 
     args = parser.parse_args()
@@ -76,12 +76,34 @@ if __name__ == '__main__':
     dim = int(config.get("ScoreData", "dim"))
     frame = int(config.get("ScoreData", "frame"))
 
-    date_dt = datetime.strptime(args.file_name_date, '%Y-%m-%d_%H-%M-%S-%f')
-    model_filepath = os.path.join(args.model_filepath, 'network_final.npz')
-    preporocessor_filepath = os.path.join(args.model_filepath, 'preprocessor.pickle')
-    postprocessor_filepath = os.path.join(args.model_filepath, 'postprocessor.pickle')
-    start = datetime.now()
-    main(args.input_npy_filepath, model_filepath, preporocessor_filepath, postprocessor_filepath,
-         args.output_csv_filepath, date_dt, gpu, dim, frame)
-    end = datetime.now()
-    print(end - start)
+    modelsrcpath = os.path.abspath(os.path.join(args.targetwavfile_filepath, '..'))
+
+    model_filepath = os.path.join(modelsrcpath, 'network_final.npz')
+    preporocessor_filepath = os.path.join(modelsrcpath, 'preprocessor.pickle')
+    postprocessor_filepath = os.path.join(modelsrcpath, 'postprocessor.pickle')
+    if os.path.exists(args.targetwavfile_filepath):
+        targetfiles = open(args.targetwavfile_filepath).readlines()
+        for targetfile in targetfiles:
+            targetfilepath = targetfile.strip()
+            if os.path.exists(targetfilepath):
+                npyfilename = os.path.split(targetfilepath)[-1]
+                outputcsvfile = os.path.join(modelsrcpath, npyfilename[:-4] + '.csv')
+                datetimesrc = outputcsvfile[-18:-4]
+                date_dt = datetime.strptime(datetimesrc[0:4] + '-' + datetimesrc[4:6] + '-'
+                                            + datetimesrc[6:8] + '_' + datetimesrc[8:10] + '-'
+                                            + datetimesrc[10:12] + '-' + datetimesrc[12:14] + '-' + '000',
+                                            '%Y-%m-%d_%H-%M-%S-%f')
+                start = datetime.now()
+                print("Scoring " + npyfilename + '...')
+                main(targetfilepath, model_filepath, preporocessor_filepath, postprocessor_filepath,
+                     outputcsvfile, date_dt, gpu, dim, frame)
+                end = datetime.now()
+                print(end - start)
+            else:
+                print('Target File list' + targetfilepath + ' not exit')
+    else:
+        print('Target File list' + args.target_file + ' not exit')
+
+
+
+

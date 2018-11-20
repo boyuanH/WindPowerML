@@ -31,23 +31,33 @@ class ConvolutionalVariationalAutoencoder(chainer.Chain):
         self.h3_size = None
         super(ConvolutionalVariationalAutoencoder, self).__init__(
             # encoder
-            enc_conv1=L.Convolution2D(n_channels, out_channels=n_filters, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            enc_conv1=L.Convolution2D(n_channels, out_channels=n_filters, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             enc_bn1=L.BatchNormalization(n_filters),
-            enc_conv2=L.Convolution2D(n_filters, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            enc_conv2=L.Convolution2D(n_filters, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             enc_bn2=L.BatchNormalization(n_filters // 2),
-            enc_conv3=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            enc_conv3=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             enc_bn3=L.BatchNormalization(n_filters // 2),
-            enc_conv4_mu=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
-            enc_conv4_ln_var=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            enc_conv4_mu=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                         initialW=W, initial_bias=bias),
+            enc_conv4_ln_var=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                             initialW=W, initial_bias=bias),
             # decoder
-            dec_conv1=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            dec_conv1=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             dec_bn1=L.BatchNormalization(n_filters // 2),
-            dec_conv2=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            dec_conv2=L.Convolution2D(n_filters // 2, n_filters // 2, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             dec_bn2=L.BatchNormalization(n_filters // 2),
-            dec_conv3=L.Convolution2D(n_filters // 2, n_filters, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
+            dec_conv3=L.Convolution2D(n_filters // 2, n_filters, ksize=ksize, pad=ksize // 2,
+                                      initialW=W, initial_bias=bias),
             dec_bn3=L.BatchNormalization(n_filters),
-            dec_conv4_mu=L.Convolution2D(n_filters, n_channels, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias),
-            dec_conv4_ln_var=L.Convolution2D(n_filters, n_channels, ksize=ksize, pad=ksize // 2, initialW=W, initial_bias=bias)
+            dec_conv4_mu=L.Convolution2D(n_filters, n_channels, ksize=ksize, pad=ksize // 2,
+                                         initialW=W, initial_bias=bias),
+            dec_conv4_ln_var=L.Convolution2D(n_filters, n_channels, ksize=ksize, pad=ksize // 2,
+                                             initialW=W, initial_bias=bias)
         )
         self.p1 = F.MaxPooling2D(2, 2)
         self.p2 = F.MaxPooling2D(2, 2)

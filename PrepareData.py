@@ -49,10 +49,6 @@ if __name__ == '__main__':
                         help='input config file')
     parser.add_argument('-o', '--output_dir', default='./output', type=str, help='output file path')
 
-    # parser.add_argument('-i', nargs='+', type=str, required=True, help='input wave file path')
-    # parser.add_argument('-c', '--channel_num', default=0, type=int, help='channel number to convert')
-    # parser.add_argument('-n', '--sample_per_frame', default=441, type=int, help='sample per frame for fft')
-    # parser.add_argument('-t', '--target_file', nargs='+', type=str, help='result file')
     args = parser.parse_args()
 
     # read config para from PrepareDataConfig file
@@ -67,14 +63,24 @@ if __name__ == '__main__':
 
     # init npylist.txt
 
-    output_npylist_filepath = os.path.join(args.output_dir, 'npylist.txt')
-    if os.path.exists(args.output_dir):
+    argsoutputdir = os.path.abspath(os.path.join(args.model_file, '..'))
+    output_npylist_filepath = os.path.join(argsoutputdir, 'npylist.txt')
+    if os.path.exists(argsoutputdir):
         if os.path.exists(output_npylist_filepath):
             os.remove(output_npylist_filepath)
     else:
-        os.makedirs(args.output_dir)
+        os.makedirs(argsoutputdir)
 
     npyfile = open(output_npylist_filepath, "w")
+
+    target_npylist_filepath = os.path.join(argsoutputdir, 'targetnpylist.txt')
+    if os.path.exists(argsoutputdir):
+        if os.path.exists(target_npylist_filepath):
+            os.remove(target_npylist_filepath)
+    else:
+        os.makedirs(argsoutputdir)
+
+    targetnpyfile = open(target_npylist_filepath, "w")
 
     # read model file path list
 
@@ -86,13 +92,15 @@ if __name__ == '__main__':
             fileitem = item.strip()
             modeldatarootpath = os.path.split(args.model_file)
             wavfile = os.path.join(modeldatarootpath[0], fileitem)
+            wavfile = fileitem
             wavfilename = os.path.split(wavfile)[-1]
             if os.path.exists(wavfile):
                 filesuffix = wavfilename[-3:]
                 if ('WAV'.find(filesuffix.upper())) == 0:
-                    output_filepath = os.path.join(args.output_dir, fileitem[:-4] + ".npy")
+                    output_filepath = os.path.join(argsoutputdir, fileitem[:-4] + ".npy")
                     if not os.path.exists(output_filepath[:0-len(wavfilename)]):
                         os.makedirs(output_filepath[:0-len(wavfilename)])
+                    print('Generating ' + fileitem[:-4] + ".npy")
                     generate_feature_file(wavfile, output_filepath, channel_num, sample_per_frame)
                     npyfile.write(output_filepath + '\n')
         end = datetime.now()
@@ -112,11 +120,14 @@ if __name__ == '__main__':
             if os.path.exists(wavfile):
                 filesuffix = wavfilename[-3:]
                 if ('WAV'.find(filesuffix.upper())) == 0:
-                    output_filepath = os.path.join(args.output_dir, fileitem[:-4] + ".npy")
+                    output_filepath = os.path.join(argsoutputdir, fileitem[:-4] + ".npy")
                     if not os.path.exists(output_filepath[:0-len(wavfilename)]):
                         os.makedirs(output_filepath[:0-len(wavfilename)])
+                    print('Generating ' + fileitem[:-4] + ".npy")
                     generate_feature_file(wavfile, output_filepath, channel_num, sample_per_frame)
+                    targetnpyfile.write(output_filepath + '\n')
         end = datetime.now()
+        targetnpyfile.close()
         print('Target   data Process time ' + str(end - start))
 
 

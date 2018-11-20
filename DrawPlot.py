@@ -12,7 +12,8 @@ def drawplotimage(csvfilepath, outputfilepath):
     plt.xlabel('time')
     plt.ylabel('score')
     plt.legend()
-    plt.show()
+    #plt.show()
+    plt.savefig(outputfilepath)
 
 
 if __name__ == '__main__':
