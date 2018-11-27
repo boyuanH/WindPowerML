@@ -1,31 +1,33 @@
 import os
 
-rootdir = 'C:\\Work\\ZKLF\\windpower\\windpower\\LocalMP\\data'
+rootdir = 'C:\\tmp\\Audio\\32'
+linux_root_dir = '/home/ubuntu/localMP/data/32'
 
 
-def directintodir(path):
+def directintodir(path, linux_dir):
     if os.path.isdir(path):
         for dirnames in os.walk(path):
             for dirname in dirnames[1]:
-                if dirname == 'detect':
+                if dirname == 'Validate':
                     modelwavfile = open(os.path.join(path, "targetwavfile.txt"), "w")
-                    for filenames in os.walk(os.path.join(path, 'detect')):
+                    for filenames in os.walk(os.path.join(path, 'Validate')):
                         for filename in filenames[2]:
                             relatepath = path[len(rootdir)-len(path):]
-                            modelwavfile.write(path+'/detect/'+filename + '\n')
+                            modelwavfile.write(linux_dir+'/Validate/'+filename + '\n')
                     modelwavfile.close()
-                elif dirname == 'train':
+                elif dirname == 'Train':
                     targetwavfile = open(os.path.join(path, "modelwavfile.txt"), "w")
                     for filenames in os.walk(os.path.join(path, 'train')):
                         for filename in filenames[2]:
                             relatepath = path[len(rootdir)-len(path):]
-                            targetwavfile.write(path+'/train/'+filename + '\n')
+                            targetwavfile.write(linux_dir+'/Train/'+filename + '\n')
                     targetwavfile.close()
                 else:
                     deepdir = os.path.join(path, dirname)
-                    directintodir(deepdir)
+                    linux_deepdir = os.path.join(linux_dir, dirname)
+                    directintodir(deepdir, linux_deepdir)
 
 
-directintodir(rootdir)
+directintodir(rootdir, linux_root_dir)
 
 

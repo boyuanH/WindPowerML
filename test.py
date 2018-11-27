@@ -40,8 +40,33 @@ def cut_file_with_span(filepath, starttime, endtime, radname):
 
 
 if __name__ == '__main__':
+
+    filenames = ['20181107_32_aigo002_Max_valid.wav',
+               '20181107_32_aigo003_208rad_valid.wav',
+               '20181107_32_aigo004_27rad_valid.wav',
+               '20181107_32_aigo005_1299rad_valid.wav']
+    for filename in filenames:
+        datetimesrc = filename[:-4]
+        hstr = datetimesrc[9:11]
+        mstr = datetimesrc[18:19]
+        sstr = datetimesrc[-11:-9]
+        if sstr.find("_") > 0:
+            sstr = '00'
+        print(hstr+"-"+mstr+"-"+sstr)
+
+
+
+
+
+
+
+
     count = 0
     wav_dir = "C:\\tmp\\Audio\\old_45#\\45#\\"
+
+    teststr = "/home/ubuntu/localMP/data/32\\aigo001\\B/Train/20181107_32_aigo001_952rad_train.wav"
+    teststr = teststr.replace("\\","/")
+
     for each in os.listdir(wav_dir):
         full_file_path = wav_dir + each
         if os.path.exists(full_file_path):

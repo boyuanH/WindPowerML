@@ -76,7 +76,11 @@ if __name__ == '__main__':
     dim = int(config.get("ScoreData", "dim"))
     frame = int(config.get("ScoreData", "frame"))
 
-    modelsrcpath = os.path.abspath(os.path.join(args.targetwavfile_filepath, '..'))
+    modelsrcpath = ""
+    if args.model_filepath is None:
+        modelsrcpath = os.path.abspath(os.path.join(args.targetwavfile_filepath, '..'))
+    else:
+        modelsrcpath = args.model_filepath
 
     model_filepath = os.path.join(modelsrcpath, 'network_final.npz')
     preporocessor_filepath = os.path.join(modelsrcpath, 'preprocessor.pickle')
@@ -87,7 +91,12 @@ if __name__ == '__main__':
             targetfilepath = targetfile.strip()
             if os.path.exists(targetfilepath):
                 npyfilename = os.path.split(targetfilepath)[-1]
-                outputcsvfile = os.path.join(modelsrcpath, npyfilename[:-4] + '.csv')
+                modelsrcpathcombin = modelsrcpath.split("\\")
+
+                csvfilename = modelsrcpathcombin[-3] + "-" + modelsrcpathcombin[-2] + "-" + modelsrcpathcombin[-1] + "_" + npyfilename[:-4] + '.csv'
+
+                outputcsvfile = os.path.join(modelsrcpath, modelsrcpathcombin[-3] + "-" + modelsrcpathcombin[-2]
+                                             + "-" + modelsrcpathcombin[-1] + "_" + x[:-4] + '.csv')
                 datetimesrc = outputcsvfile[-18:-4]
                 date_dt = datetime.strptime(datetimesrc[0:4] + '-' + datetimesrc[4:6] + '-'
                                             + datetimesrc[6:8] + '_' + datetimesrc[8:10] + '-'
